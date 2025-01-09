@@ -1,0 +1,24 @@
+Neste projeto de programação, você implementará dois sistemas de criptografia/decriptografia, um usando AES no modo CBC (Cypher Block Chain) e outro usando AES no modo contador (CTR). Em ambos os casos, o random IV de criptografia de 16 bytes é escolhido aleatoriamente e é anexado ao início do texto cifrado.
+Para a criptografia CBC, utilizamos o esquema de preenchimento PKCS5 (ver o vídeo em anexo). Embora solicito que você implemente tanto a criptografia quanto a decriptografia, testaremos apenas a função de decriptografia. Nas seguintes questões, você receberá uma chave AES e um texto cifrado (ambos codificados em hexadecimal) e seu objetivo é recuperar o texto simples e nos enviar as respostas.
+Para uma implementação de AES, você pode usar uma biblioteca criptográfica existente, como PyCrypto (Python) ou qualquer outra. Embora seja aceitável usar as funções AES integradas, pedimos que, como experiência de aprendizado, você implemente os modos CBC e CTR por conta própria.
+
+Questão 1
+Chave CBC: 140b41b22a29beb4061bda66b6747e14
+Cifra CBC 1: 4ca00ff4c898d61e1edbf1800618fb2828a226d160dad07883d04e008a7897ee2e4b7465d5290d0c0e6c6822236e1daafb94ffe0c5da05d9476be028ad7c1d81
+
+Questão 2 
+Chave CBC: 140b41b22a29beb4061bda66b6747e14
+Cifra CBC 2: 5b68629feb8606f9a6667670b75b38a5b4832d0f26e1ab7da33249de7d4afc48e713ac646ace36e872ad5fb8a512428a6e21364b0c374df45503473c5242a253
+
+Questão 3 
+Chave CTR: 36f18357be4dbd77f050515c73fcf9f2
+Cifra CTR 1: 69dda8455c7dd4254bf353b773304eec0ec7702330098ce7f7520d1cbbb20fc388d1b0adb5054dbd7370849dbf0b88d393f252e764f1f5f7ad97ef79d59ce29f5f51eeca32eabedd9afa9329
+
+Questão 4 
+Chave CTR: 36f18357be4dbd77f050515c73fcf9f2
+Cifra CTR 2: 770b80259ec33beb2561358a9f2dc617e46218c0a53cbeca695ae45faa8952aa0e311bde9d4e01726d3184c34451
+
+Na sua entrega, você deve responder a essas quatro questões e também enviar o código implementado. 
+Essa atividade é individual.
+
+Vídeos anexados no Moodle.
