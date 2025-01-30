@@ -5,7 +5,8 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 
 
-def xor(a, b):
+# apply the XOR gate between two bytes
+def xor(a: bytes, b: bytes):
     return bytes(x ^ y for x, y in zip(a, b))
 
 
@@ -13,47 +14,68 @@ def increment_counter(counter):
     return (int.from_bytes(counter, "big") + 1).to_bytes(len(counter), "big")
 
 
+# encrypt based on the CBC method
 def encrypt_cbc(plaintext: bytes, key: bytes):
+    # define the block size
     block_size = 16
+
+    # generate the random IV and pad the plaintext with the size of the block
     random_iv = os.urandom(block_size)
     plaintext = pad(plaintext, block_size)
 
+    # initialize the cipher blocks
     cipher_blocks = []
     previous_block = random_iv
 
     cipher = AES.new(key, AES.MODE_ECB)
     for i in range(0, len(plaintext), block_size):
+        # get the block and do the XOR with the previous block
         block = plaintext[i : i + block_size]
         xored_block = xor(block, previous_block)
+        # encrypt using AES
         encrypted_block = cipher.encrypt(xored_block)
+        # append and update the previous block to the recently ciphered block
         cipher_blocks.append(encrypted_block)
         previous_block = encrypted_block
 
+    # append the random IV with the cipher blocks
     return random_iv + b"".join(cipher_blocks)
 
 
+# decrypt based on the CBC method
 def decrypt_cbc(ciphertext: bytes, key: bytes):
+    # define the block size
     block_size = 16
+
+    # extract the ciphered text and the random IV
     random_iv = ciphertext[0:block_size]
     ciphertext = ciphertext[block_size:]
 
+    # plaintext list
     plaintext = []
     previous_block = random_iv
 
     cipher = AES.new(key, AES.MODE_ECB)
     for i in range(0, len(ciphertext), block_size):
+        # extract the block and decrypt using AES
         block = ciphertext[i : i + block_size]
         decrypted_block = cipher.decrypt(block)
+        # do the XOR with the previous block to get the plaintext
         plaintext_block = xor(decrypted_block, previous_block)
+        # append to the list and update the previous block
         plaintext.append(plaintext_block)
         previous_block = block
 
+    # join the plaintext blocks list and remove the padding
     return unpad(b"".join(plaintext), block_size)
 
 
+# encrypt based on the CTR method
 def encrypt_ctr(plaintext: bytes, key: bytes):
+    # define the block size
     block_size = 16
 
+    # generate the random IV and start the counter and the ciphertext bytes
     random_iv = os.urandom(block_size)
     counter = random_iv
     ciphertext = b""
@@ -65,14 +87,20 @@ def encrypt_ctr(plaintext: bytes, key: bytes):
         ciphertext += xor(block, keystream[: len(block)])
         counter = increment_counter(counter)
 
+    # return ciphertext with the random IV as prefix
     return random_iv + ciphertext
 
 
+# decrypt based on the CTR method
 def decrypt_ctr(ciphertext: bytes, key: bytes):
+    # define the block size
     block_size = 16
+
+    # extract the random IV and the ciphertext
     random_iv = ciphertext[0:block_size]
     ciphertext = ciphertext[block_size:]
 
+    # define the plaintext bytes and the initial counter
     plaintext = b""
     counter = random_iv
 
@@ -87,6 +115,7 @@ def decrypt_ctr(ciphertext: bytes, key: bytes):
 
 
 def main():
+    # parse arguments
     args = sys.argv
     if len(args) != 5:
         print(
@@ -94,17 +123,19 @@ def main():
         )
         sys.exit(1)
 
+    # extract the method and the cryptography strategy used
     method = args[1]
     strategy = args[2]
 
+    # validate method and strategy
     if method != "encrypt" and method != "decrypt":
         print('Invalid method.\nExpected "encrypt" or "decrypt".')
         sys.exit(1)
-
     if strategy != "cbc" and strategy != "ctr":
         print('Invalid strategy.\nExpected "cbc" or "ctr".')
         sys.exit(1)
 
+    # apply the method + strategy and return the result
     match method:
         case "encrypt":
             key = bytes.fromhex(args[3])
