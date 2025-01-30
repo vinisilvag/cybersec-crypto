@@ -6,16 +6,18 @@ from Crypto.Util.Padding import pad, unpad
 
 
 # apply the XOR gate between two bytes
-def xor(a: bytes, b: bytes):
+def xor(a: bytes, b: bytes) -> bytes:
     return bytes(x ^ y for x, y in zip(a, b))
 
 
-def increment_counter(counter):
+# increment the counter
+def increment_counter(counter: bytes) -> bytes:
+    # get the integer from the bytes with big endian order, increment and encode again
     return (int.from_bytes(counter, "big") + 1).to_bytes(len(counter), "big")
 
 
 # encrypt based on the CBC method
-def encrypt_cbc(plaintext: bytes, key: bytes):
+def encrypt_cbc(plaintext: bytes, key: bytes) -> bytes:
     # define the block size
     block_size = 16
 
@@ -43,7 +45,7 @@ def encrypt_cbc(plaintext: bytes, key: bytes):
 
 
 # decrypt based on the CBC method
-def decrypt_cbc(ciphertext: bytes, key: bytes):
+def decrypt_cbc(ciphertext: bytes, key: bytes) -> bytes:
     # define the block size
     block_size = 16
 
@@ -71,7 +73,7 @@ def decrypt_cbc(ciphertext: bytes, key: bytes):
 
 
 # encrypt based on the CTR method
-def encrypt_ctr(plaintext: bytes, key: bytes):
+def encrypt_ctr(plaintext: bytes, key: bytes) -> bytes:
     # define the block size
     block_size = 16
 
@@ -82,9 +84,12 @@ def encrypt_ctr(plaintext: bytes, key: bytes):
 
     cipher = AES.new(key, AES.MODE_ECB)
     for i in range(0, len(plaintext), block_size):
+        # extract the block and generate the keystream by encrypting the counter
         block = plaintext[i : i + block_size]
         keystream = cipher.encrypt(counter)
+        # get the ciphertext doing the XOR between the block and the keystream generated with the len of the block
         ciphertext += xor(block, keystream[: len(block)])
+        # increment the counter
         counter = increment_counter(counter)
 
     # return ciphertext with the random IV as prefix
@@ -92,7 +97,7 @@ def encrypt_ctr(plaintext: bytes, key: bytes):
 
 
 # decrypt based on the CTR method
-def decrypt_ctr(ciphertext: bytes, key: bytes):
+def decrypt_ctr(ciphertext: bytes, key: bytes) -> bytes:
     # define the block size
     block_size = 16
 
@@ -106,11 +111,15 @@ def decrypt_ctr(ciphertext: bytes, key: bytes):
 
     cipher = AES.new(key, AES.MODE_ECB)
     for i in range(0, len(ciphertext), block_size):
+        # extract the block and generate the keystream by encrypting the counter
         block = ciphertext[i : i + block_size]
         keystream = cipher.encrypt(counter)
+        # get the plaintext doing the XOR between the block and the keystream prefix with the size of the block
         plaintext += xor(block, keystream[: len(block)])
+        # increment the counter
         counter = increment_counter(counter)
 
+    # return the plaintext
     return plaintext
 
 
