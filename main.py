@@ -2,7 +2,24 @@ import os
 import sys
 
 from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
+
+
+# pad function
+def pkcs5_pad(data: bytes, block_size: int) -> bytes:
+    pad_len = block_size - (len(data) % block_size)
+    return data + bytes([pad_len] * pad_len)
+
+
+# unpad function
+def pkcs5_unpad(data: bytes, block_size: int) -> bytes:
+    pad_len = data[-1]
+    if (
+        pad_len < 1
+        or pad_len > block_size
+        or data[-pad_len:] != bytes([pad_len] * pad_len)
+    ):
+        raise ValueError("Invalid padding")
+    return data[:-pad_len]
 
 
 # apply the XOR gate between two bytes
@@ -23,7 +40,7 @@ def encrypt_cbc(plaintext: bytes, key: bytes) -> bytes:
 
     # generate the random IV and pad the plaintext with the size of the block
     random_iv = os.urandom(block_size)
-    plaintext = pad(plaintext, block_size)
+    plaintext = pkcs5_pad(plaintext, block_size)
 
     # initialize the cipher blocks
     cipher_blocks = []
@@ -69,7 +86,7 @@ def decrypt_cbc(ciphertext: bytes, key: bytes) -> bytes:
         previous_block = block
 
     # join the plaintext blocks list and remove the padding
-    return unpad(b"".join(plaintext), block_size)
+    return pkcs5_unpad(b"".join(plaintext), block_size)
 
 
 # encrypt based on the CTR method
